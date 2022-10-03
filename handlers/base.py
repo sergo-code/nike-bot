@@ -13,7 +13,7 @@ async def start(message: types.Message):
         database.insert(table='profile', insert='telegram_id', value=message.from_id)
     keyboard = admin if await is_admin(message.chat.id) else user
     text = "Good day!\n" \
-           "Enter the link to the Nike product of interest."
+           "To interact with the bot, use the additional keyboard."
     await message.answer(text, reply_markup=keyboard)
 
 
