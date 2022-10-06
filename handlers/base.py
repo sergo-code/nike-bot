@@ -12,13 +12,15 @@ async def start(message: types.Message):
     if not bool(database.select(f'SELECT * FROM profile WHERE telegram_id = {message.from_id}').fetchone()):
         database.insert(table='profile', insert='telegram_id', value=message.from_id)
     keyboard = admin if await is_admin(message.chat.id) else user
-    text = "Good day!\n" \
-           "To interact with the bot, use the additional keyboard."
+    text = "👋 Good day\n" \
+           "🇺🇸 This bot only works for USA store\n" \
+           "⌨ To interact with the bot, use the additional keyboard"
     await message.answer(text, reply_markup=keyboard)
 
 
 async def about(message: types.Message):
     text = f'{hbold("Nike Sale Service")}\n\n' \
+           f'🇺🇸 This bot only works for USA store\n\n' \
            'It will help to save on the purchase, if you think about it in advance.\n\n' \
            '1. Сlick ➕ Add a product.\n' \
            '2. Send the bot a link to an available product.\n' \
