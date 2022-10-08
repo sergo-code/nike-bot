@@ -13,9 +13,11 @@ async def up():
         links = database.select(request).fetchall()
         data = list()
         for link in links:
-            data.append(await get_item(link[0]))
+            temp = await get_item(link[0])
+            if temp:
+                data.append(temp)
         for i in range(len(data)):
-            request = "SELECT telegram_id, size, price FROM subscribers WHERE product_id='{}'".format(data[i]['cloud_product_id'])
+            request = "SELECT telegram_id, size, price, id FROM subscribers WHERE product_id='{}'".format(data[i]['cloud_product_id'])
             subs = database.select(request).fetchall()
             for sub in subs:
                 if data[i]['product_type'] == 'FOOTWEAR':
@@ -25,7 +27,7 @@ async def up():
                 else:
                     emoji = '🛍️'
                 if sub[1] in data[i]['size']:
-                    if sub[2] < int(data[i]['current_price']):
+                    if float(sub[2]) > float(data[i]['current_price']):
                         text = f"🔥 {hbold('The price has dropped')} 🔥\n\n"\
                                f"➖➖➖➖➖➖➖➖➖➖➖➖\n" \
                                f"{emoji} {hlink(data[i]['title'], data[i]['url'])}\n"\
@@ -33,7 +35,7 @@ async def up():
                                f"💰 Old price: {hcode(sub[2])} $\n"\
                                f"🤑 New price: {hcode(data[i]['current_price'])} $\n" \
                                f"➖➖➖➖➖➖➖➖➖➖➖➖"
-                        await del_subscribe(data[i]['cloud_product_id'])
+                        await del_subscribe(sub[3])
                         await bot.send_message(sub[0], text=text, disable_web_page_preview=True, parse_mode='html')
                 else:
                     text = f"🛑 {hbold('Sold out size')} 🛑\n\n" \
@@ -43,10 +45,10 @@ async def up():
                            f"💰 Price: {hcode(sub[2])} $\n" \
                            f"➖➖➖➖➖➖➖➖➖➖➖➖"
 
-                    await del_subscribe(data[i]['cloud_product_id'])
+                    await del_subscribe(sub[3])
                     await bot.send_message(sub[0], text=text, disable_web_page_preview=True, parse_mode='html')
-        await asyncio.sleep(2*60)
+        await asyncio.sleep(5*60)
 
 
-async def del_subscribe(cloud_product_id):
-    database.delete('subscribers', 'product_id', f"'{cloud_product_id}'")
+async def del_subscribe(sub_id):
+    database.delete('subscribers', 'id', f"'{sub_id}'")

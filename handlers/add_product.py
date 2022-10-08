@@ -47,19 +47,22 @@ async def set_link(message: types.Message, state=FSMContext):
             len(message.text.split('/')) == 6:
 
         data = await get_item(message.text)
-
-        request = "SELECT cloud_product_id FROM nike WHERE cloud_product_id='{}'".format(data['cloud_product_id'])
-        if not bool(database.select(request).fetchone()):
-            # Отправка данных в таблицу nike
-            insert = 'cloud_product_id, title, url, product_type, seller'
-            value = "'{cloud_product_id}', '{title}', '{url}', '{product_type}', '{seller}'".format(
-                cloud_product_id=data['cloud_product_id'],
-                title=data['title'],
-                url=data['url'],
-                product_type=data['product_type'],
-                seller=data['seller'])
-            database.insert(table='nike', insert=insert, value=value)
-        await message_product(message, data)
+        if data:
+            request = "SELECT cloud_product_id FROM nike WHERE cloud_product_id='{}'".format(data['cloud_product_id'])
+            if not bool(database.select(request).fetchone()):
+                # Отправка данных в таблицу nike
+                insert = 'cloud_product_id, title, url, product_type, seller'
+                value = "'{cloud_product_id}', '{title}', '{url}', '{product_type}', '{seller}'".format(
+                    cloud_product_id=data['cloud_product_id'],
+                    title=data['title'],
+                    url=data['url'],
+                    product_type=data['product_type'],
+                    seller=data['seller'])
+                database.insert(table='nike', insert=insert, value=value)
+            await message_product(message, data)
+        else:
+            text = 'Invalid link specified!'
+            await message.answer(text)
     else:
         text = 'Invalid link specified!'
         await message.answer(text)
