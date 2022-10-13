@@ -48,11 +48,18 @@ async def get_item(url):
         response = await request(url, headers)
         if response.status == 200:
             soup = BeautifulSoup(await response.text(), 'html.parser')
-            model = soup.find('li', class_='description-preview__style-color ncss-li').text.split()[1]
+            model = soup.find('li', class_='description-preview__style-color ncss-li')
+            if model is not None:
+                model = model.text.split()[1]
+            else:
+                logging.info(f'{response.status, url}')
+                return False
         else:
             logging.info(f'{response.status, url}')
             return False
-
+    else:
+        logging.info(f'{url}')
+        return False
     response = await request(url, headers)
     if response.status == 200:
         soup = BeautifulSoup(await response.text(), 'html.parser')

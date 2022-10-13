@@ -1,9 +1,14 @@
 import asyncio
+import os
+from dotenv import load_dotenv
 
 from aiogram.utils.markdown import hbold, hlink, hcode
 
 from services.connection import database, bot
 from nike.get_product import get_item
+
+
+load_dotenv()
 
 
 async def up():
@@ -16,8 +21,12 @@ async def up():
             temp = await get_item(link[0])
             if temp:
                 data.append(temp)
+            else:
+                text = '☣ The number of links is not equal to the answers. Please check the logs.'
+                await bot.send_message(os.getenv('admin_tg'), text=text, parse_mode='html')
         for i in range(len(data)):
-            request = "SELECT telegram_id, size, price, id FROM subscribers WHERE product_id='{}'".format(data[i]['cloud_product_id'])
+            request = "SELECT telegram_id, size, price, id FROM subscribers WHERE product_id='{}'" \
+                      "".format(data[i]['cloud_product_id'])
             subs = database.select(request).fetchall()
             for sub in subs:
                 if data[i]['product_type'] == 'FOOTWEAR':
